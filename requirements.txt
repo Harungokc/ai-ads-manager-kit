@@ -1,7 +1,10 @@
-# Meta Ads
-meta-ads-mcp @ git+https://github.com/pipeboard-co/meta-ads-mcp.git
+# NOT: MCP server'lar hosted servisler (npx/pip ile kurulmaz) — bkz. docs/MCP-KURULUM.md.
+# Aşağıdakiler yalnızca SELF-HOST veya yerel python scriptleri/analiz içindir.
 
-# Google Ads
+# Meta Ads MCP — yalnızca self-host edersen gerekir (hosted kullanıyorsan kaldır):
+# meta-ads-mcp @ git+https://github.com/pipeboard-co/meta-ads-mcp.git
+
+# Google Ads (self-host / doğrudan API scriptleri)
 google-ads>=22.0.0
 google-analytics-data>=0.18.0
 

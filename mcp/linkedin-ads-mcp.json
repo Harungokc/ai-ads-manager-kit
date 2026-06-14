@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "linkedin-ads": {
+      "command": "node",
+      "args": ["/yol/linkedin-ads-mcp/dist/index.js"],
+      "env": {
+        "LINKEDIN_CLIENT_ID": "${LINKEDIN_CLIENT_ID}",
+        "LINKEDIN_CLIENT_SECRET": "${LINKEDIN_CLIENT_SECRET}"
+      }
+    }
+  }
+}

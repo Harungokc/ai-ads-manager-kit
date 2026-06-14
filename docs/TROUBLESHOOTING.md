@@ -29,8 +29,9 @@
 
 ### "MCP server not found"
 ```bash
-# Server'ı yeniden ekle
-claude /mcp add meta-ads -- npx -y @pipeboard-co/meta-ads-mcp
+# Server'ı yeniden ekle (hosted MCP — npx paketi değil; bkz. docs/MCP-KURULUM.md)
+claude mcp add --transport http meta-ads https://meta-ads.mcp.pipeboard.co/
+claude mcp list
 ```
 
 ### "Connection timeout"

@@ -1,0 +1,78 @@
+{
+  "name": "4 - TikTok Performans Raporu",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "days", "triggerAtHour": 9 }] }
+      },
+      "id": "schedule",
+      "name": "Her Gün 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 320]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://business-api.tiktok.com/open_api/v1.3/report/integrated/get/",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Access-Token", "value": "={{ $env.TIKTOK_ACCESS_TOKEN }}" }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "advertiser_id", "value": "={{ $env.TIKTOK_ADVERTISER_ID }}" },
+            { "name": "report_type", "value": "BASIC" },
+            { "name": "data_level", "value": "AUCTION_CAMPAIGN" },
+            { "name": "dimensions", "value": "[\"campaign_id\"]" },
+            { "name": "metrics", "value": "[\"spend\",\"impressions\",\"clicks\",\"ctr\",\"cpc\",\"conversion\",\"video_play_actions\",\"video_watched_6s\"]" },
+            { "name": "start_date", "value": "={{ $now.minus({ days: 7 }).format('yyyy-MM-dd') }}" },
+            { "name": "end_date", "value": "={{ $now.format('yyyy-MM-dd') }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "tiktok-fetch",
+      "name": "TikTok — Son 7 Gün Rapor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 320],
+      "notes": "TikTok Marketing API v1.3 integrated report. Access-Token + advertiser_id gerekir (bkz. .env). Kurulum: docs/MCP-KURULUM.md / PLATFORM-API.md."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"claude-sonnet-4-6\",\n  max_tokens: 2000,\n  system: \"Sen bir TikTok Ads analistisin. Performans verisini analiz et: düşük CTR/yüksek CPC kampanyaları, video tamamlanma oranı sorunları, creative yorgunluğu ve bütçe önerileri. Veride olmayan metrik uydurma. Maddeli, Türkçe yaz.\",\n  messages: [{ role: \"user\", content: \"Son 7 gün TikTok verisi:\\n\" + JSON.stringify($json) }]\n}) }}",
+        "options": {}
+      },
+      "id": "claude-analyze",
+      "name": "Claude — TikTok Analiz",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 320],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE", "name": "Anthropic API (x-api-key)" } }
+    }
+  ],
+  "connections": {
+    "Her Gün 09:00": { "main": [[{ "node": "TikTok — Son 7 Gün Rapor", "type": "main", "index": 0 }]] },
+    "TikTok — Son 7 Gün Rapor": { "main": [[{ "node": "Claude — TikTok Analiz", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {},
+  "pinData": {}
+}

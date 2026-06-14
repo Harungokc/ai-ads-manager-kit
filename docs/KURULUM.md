@@ -205,52 +205,38 @@ n8n start
 
 ## Adım 6: MCP Server Kurulumu
 
+> ⚠️ **Önemli:** Bu kitin kullandığı MCP server'lar **hosted servislerdir** (npm `npx`
+> paketi DEĞİL). Aşağıdaki komutlar bu gerçeğe göre yazılmıştır. Ayrıntılı sürüm ve
+> alternatifler (self-host) için: [`MCP-KURULUM.md`](MCP-KURULUM.md).
+
 ### 6.1: Claude Code'da MCP Ekle
 ```bash
-# Terminalde çalıştır:
-claude /mcp add meta-ads -- npx -y @pipeboard-co/meta-ads-mcp
-claude /mcp add google-ads -- npx -y @irinabuht12-oss/google-meta-ads-ga4-mcp
+# Meta Ads (pipeboard, hosted remote MCP):
+claude mcp add --transport http meta-ads https://meta-ads.mcp.pipeboard.co/
+
+# TikTok + LinkedIn (+Google+Meta) — adspirer (hosted, OAuth, token gerekmez):
+claude mcp add --transport http adspirer https://mcp.adspirer.com/mcp
+
+# Google + Meta + GA4 (Ryze AI, hosted SSE) — endpoint'i kaynaktan al:
+#   https://www.get-ryze.ai/  →  $GA_MCP_ENDPOINT_URL
+claude mcp add --transport sse google-meta-ads-ga4 "$GA_MCP_ENDPOINT_URL"
 ```
 
-### 6.2: MCP Server'ı Test Et
+### 6.2: Bağlandı mı Kontrol Et
 ```bash
-claude
-# Claude Code açılacak, şunu sor:
+claude mcp list          # bağlı server'ları gösterir
+claude                    # oturum içinde /mcp ile araçları gör
 > "Meta Ads'te kampanya listemi göster"
 ```
 
-### 6.3: Smithery.ai ile Kurulum (Alternatif)
-1. [smithery.ai](https://smithery.ai/) → arama yap
-2. `@pipeboard-co/meta-ads-mcp` veya `@irinabuht12-oss/google-meta-ads-ga4-mcp` bul
-3. "Install" → npx komutunu kopyala ve çalıştır
+### 6.3: Hazır Config Dosyaları
+Repodaki [`mcp/`](../mcp/) klasöründe hazır config'ler var (URL formunda):
+`meta-ads-mcp.json`, `adspirer-mcp.json`, `google-ads-mcp.json`. İstersen bunları
+`~/.claude/settings/mcp.json`'a kopyalayabilirsin.
 
-### 6.4: MCP Config Dosyasını Manuel Ayarla
-`~/.claude/settings/mcp.json` dosyasını düzenle:
-```json
-{
-  "mcpServers": {
-    "meta-ads-mcp": {
-      "command": "npx",
-      "args": ["-y", "@pipeboard-co/meta-ads-mcp"],
-      "env": {
-        "META_ACCESS_TOKEN": "TOKENIN_BURAYA",
-        "META_AD_ACCOUNT_ID": "act_XXXXXXXXX"
-      }
-    },
-    "google-ads-mcp": {
-      "command": "npx",
-      "args": ["-y", "@irinabuht12-oss/google-meta-ads-ga4-mcp"],
-      "env": {
-        "GOOGLE_ADS_DEVELOPER_TOKEN": "TOKENIN_BURAYA",
-        "GOOGLE_ADS_CLIENT_ID": "xxx.apps.googleusercontent.com",
-        "GOOGLE_ADS_CLIENT_SECRET": "CLIENT_SECRET",
-        "GOOGLE_ADS_REFRESH_TOKEN": "REFRESH_TOKEN",
-        "GOOGLE_ADS_CUSTOMER_ID": "XXX-XXX-XXXX"
-      }
-    }
-  }
-}
-```
+### 6.4: Self-host (İleri Seviye)
+Hosted yerine kendi sunucunda çalıştırmak istersen (TikTok için AdsMCP, LinkedIn için
+danielpopamd, Meta için kaynaktan), adım adım: [`MCP-KURULUM.md`](MCP-KURULUM.md).
 
 ---
 
@@ -402,8 +388,9 @@ print('✅ Meta API:', 'data' in r.json())
 
 ### "MCP server bulunamadı" hatası
 ```bash
-# Yeniden ekle
-claude /mcp add meta-ads -- npx -y @pipeboard-co/meta-ads-mcp
+# Yeniden ekle (hosted MCP — npx değil)
+claude mcp add --transport http meta-ads https://meta-ads.mcp.pipeboard.co/
+claude mcp list   # bağlı mı kontrol et
 ```
 
 ### "Rate limit" hatası

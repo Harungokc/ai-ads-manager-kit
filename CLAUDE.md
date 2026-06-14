@@ -22,28 +22,23 @@ cp .env.example .env
 
 ## MCP Server Config'leri
 
-### Meta Ads MCP
-```json
-{
-  "mcpServers": {
-    "meta-ads-mcp": {
-      "command": "npx",
-      "args": ["-y", "@pipeboard-co/meta-ads-mcp"]
-    }
-  }
-}
+> Bu MCP server'lar **hosted servislerdir** (npx paketi değil). URL formunda eklenir.
+> Ayrıntı: [`docs/MCP-KURULUM.md`](docs/MCP-KURULUM.md).
+
+### Meta Ads MCP (pipeboard, hosted)
+```bash
+claude mcp add --transport http meta-ads https://meta-ads.mcp.pipeboard.co/
 ```
 
-### Google + Meta + GA4 MCP
-```json
-{
-  "mcpServers": {
-    "google-meta-ads-ga4-mcp": {
-      "command": "npx",
-      "args": ["-y", "@irinabuht12-oss/google-meta-ads-ga4-mcp"]
-    }
-  }
-}
+### TikTok + LinkedIn (+Google+Meta) — adspirer (hosted, OAuth)
+```bash
+claude mcp add --transport http adspirer https://mcp.adspirer.com/mcp
+```
+
+### Google + Meta + GA4 MCP (Ryze AI, hosted SSE)
+```bash
+# Endpoint'i https://www.get-ryze.ai/ üzerinden al → GA_MCP_ENDPOINT_URL
+claude mcp add --transport sse google-meta-ads-ga4 "$GA_MCP_ENDPOINT_URL"
 ```
 
 ## Platform API Anahtarları

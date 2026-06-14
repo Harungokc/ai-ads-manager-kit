@@ -56,7 +56,41 @@ Hazır config: [`mcp/google-ads-mcp.json`](../mcp/google-ads-mcp.json) (URL'i en
 
 ---
 
-## 3. Eklediğini Doğrula
+## 3. TikTok + LinkedIn Ads (adspirer)
+
+**Kaynak:** [amekala/ads-mcp](https://github.com/amekala/ads-mcp) · TikTok 31 + LinkedIn 45 (+Google +Meta = 175+ araç)
+
+Tek hosted MCP ile TikTok **ve** LinkedIn (ayrıca Google+Meta). OAuth 2.1 ile çalışır —
+**token/env gerekmez**, kimlik doğrulama tarayıcıdan yapılır.
+
+### Yöntem A — Hosted (önerilen)
+```bash
+claude mcp add --transport http adspirer https://mcp.adspirer.com/mcp
+```
+İlk kullanımda tarayıcı açılır, reklam hesaplarını OAuth ile bağlarsın.
+
+Hazır config: [`mcp/adspirer-mcp.json`](../mcp/adspirer-mcp.json)
+
+### Yöntem B — Self-host (dedicated, ileri seviye)
+Tek platform için ayrı, kendi sunucunda:
+
+**TikTok** — [AdsMCP/tiktok-ads-mcp-server](https://github.com/AdsMCP/tiktok-ads-mcp-server) (python):
+```bash
+git clone https://github.com/AdsMCP/tiktok-ads-mcp-server && cd adsmcp-server
+python -m venv venv && source venv/bin/activate && pip install -e .
+# .env: TIKTOK_APP_ID, TIKTOK_APP_SECRET   → config: mcp/tiktok-ads-mcp.json
+```
+
+**LinkedIn** — [danielpopamd/linkedin-ads-mcp](https://github.com/danielpopamd/linkedin-ads-mcp) (node):
+```bash
+git clone https://github.com/danielpopamd/linkedin-ads-mcp && cd linkedin-ads-mcp
+npm install && npm run build && npm run auth
+# .env: LINKEDIN_CLIENT_ID, LINKEDIN_CLIENT_SECRET   → config: mcp/linkedin-ads-mcp.json
+```
+
+---
+
+## 4. Eklediğini Doğrula
 
 ```bash
 claude mcp list          # bağlı MCP server'ları listeler
@@ -70,7 +104,7 @@ claude "Meta Ads hesabımdaki aktif kampanyaları listele"
 
 ---
 
-## 4. Sık Sorunlar
+## 5. Sık Sorunlar
 
 | Sorun | Çözüm |
 |-------|-------|

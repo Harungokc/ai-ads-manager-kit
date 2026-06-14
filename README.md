@@ -14,22 +14,63 @@ bağlar; 600+ araç bu upstream server'lardan gelir (hepsi [aşağıda](#-kaynak
 kredilenmiştir). Repo'nun kattığı değer:
 
 - ✅ **Hazır MCP config'leri** — server'ları tek dosyayla bağla ([`mcp/`](mcp/), [`docs/MCP-KURULUM.md`](docs/MCP-KURULUM.md))
-- ✅ **Claude Code skill'leri & prompt'ları** — Meta/Google için hazır uzman davranışı ([`skills/`](skills/), [`prompts/`](prompts/))
+- ✅ **Claude Code skill'leri & prompt'ları** — Meta, Google, TikTok, LinkedIn için hazır uzman davranışı ([`skills/`](skills/), [`prompts/`](prompts/))
 - ✅ **n8n workflow'ları** — kampanya oluşturma, optimizasyon, çok-platform rapor (import-edilebilir, [`workflows/`](workflows/))
 - ✅ **Türkçe, sıfırdan dokümantasyon** — kurulum, learning phase, troubleshooting ([`docs/`](docs/))
+
+> 💡 **İpucu:** Tek bir hosted MCP ile (adspirer) **TikTok + LinkedIn + Google + Meta**'yı
+> birden bağlayabilirsin — OAuth ile, token uğraşı olmadan. Bkz. [Yol Haritası](#️-nereden-başlamalıyım-yol-haritası).
+
+---
+
+## 🗺️ Nereden Başlamalıyım? (Yol Haritası)
+
+Durumuna göre doğru rehbere git — sırayla takip et:
+
+| Durumun | Başla buradan |
+|---------|---------------|
+| 🆕 **"Sıfırdanım, hiç kurmadım / token'ım yok"** | [`docs/KURULUM.md`](docs/KURULUM.md) — 8 adımlık, sıfırdan tam kurulum |
+| 🔌 **"Hesabım/token'ım hazır, sadece MCP bağlayacağım"** | [`docs/MCP-KURULUM.md`](docs/MCP-KURULUM.md) — Claude Code'a MCP ekleme |
+| ⚙️ **"n8n ile otomasyon (zamanlı rapor/optimizasyon) istiyorum"** | [`docs/N8N-KURULUM.md`](docs/N8N-KURULUM.md) — workflow import + credential |
+| 🔍 **"Önce inceliyorum, ne olduğuna bakıyorum"** | Aşağıdaki [Desteklenen Platformlar](#-desteklenen-platformlar) + [Karşılaştırma](#-özellik-karşılaştırması--best-of-11-repo) |
+| 🛠️ **"Geliştirmek / yeni platform eklemek istiyorum"** | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
+
+**Önerilen akış:** Sıfırdaysan → `KURULUM.md` (token'ları al) → `MCP-KURULUM.md` (Claude Code'a bağla) → istersen `N8N-KURULUM.md` (otomasyon).
+
+---
+
+## 🎯 Desteklenen Platformlar
+
+Her platform aynı yapıda gelir: **MCP config + skill + prompt + workflow**.
+
+| Platform | Durum | MCP | Skill | Prompt | Workflow | Sağlayıcı (MCP) |
+|----------|-------|-----|-------|--------|----------|------------------|
+| **Meta Ads** | ✅ Hazır | [config](mcp/meta-ads-mcp.json) | [skill](skills/meta-ads-skill.md) | [prompt](prompts/meta-ads-prompt.md) | [1](workflows/1-meta-kampanya-olustur.json), [3](workflows/3-cross-platform-report.json) | pipeboard (hosted) |
+| **Google Ads / GA4** | ✅ Hazır | [config](mcp/google-ads-mcp.json) | — | [prompt](prompts/google-ads-prompt.md) | [2](workflows/2-google-ads-optimize.json), [3](workflows/3-cross-platform-report.json) | Ryze AI (hosted) |
+| **TikTok Ads** | 🆕 Yeni | [config](mcp/tiktok-ads-mcp.json) | [skill](skills/tiktok-ads-skill.md) | [prompt](prompts/tiktok-ads-prompt.md) | [4](workflows/4-tiktok-rapor.json) | adspirer (hosted) / AdsMCP (self-host) |
+| **LinkedIn Ads** | 🆕 Yeni | [config](mcp/linkedin-ads-mcp.json) | [skill](skills/linkedin-ads-skill.md) | [prompt](prompts/linkedin-ads-prompt.md) | [5](workflows/5-linkedin-rapor.json) | adspirer (hosted) / danielpopamd (self-host) |
+| YouTube / Apple Ads | 🔜 Sırada | — | — | — | — | claude-ads (referans) |
+
+> **adspirer** tek MCP ile TikTok+LinkedIn (+Google+Meta) verir. Meta'yı ayrıca pipeboard,
+> Google/GA4'ü ayrıca Ryze AI ile de bağlayabilirsin. Detay: [`docs/MCP-KURULUM.md`](docs/MCP-KURULUM.md).
+
+---
 
 ## ⚡ Hızlı Başlangıç
 
 ### 1. Kurulum (5 dakika)
 
 ```bash
-# Claude Code'da Meta Ads MCP'yi (pipeboard, hosted) ekle:
+# Meta Ads (pipeboard, hosted):
 claude mcp add --transport http meta-ads https://meta-ads.mcp.pipeboard.co/
+
+# TikTok + LinkedIn (+Google+Meta) — adspirer (hosted, OAuth, token gerekmez):
+claude mcp add --transport http adspirer https://mcp.adspirer.com/mcp
 
 # Bağlandı mı kontrol et:
 claude mcp list
 
-# Detaylı MCP kurulumu (Google/GA4 dahil) → docs/MCP-KURULUM.md
+# Detaylı MCP kurulumu (Google/GA4 + self-host dahil) → docs/MCP-KURULUM.md
 # n8n workflow'larını import et → workflows/ (bkz. docs/N8N-KURULUM.md)
 ```
 > ⚠️ Bu MCP server'lar **hosted servislerdir** (npm `npx` paketi değil). Endpoint ve
@@ -125,20 +166,29 @@ ai-ads-manager-kit/
 ├── workflows/          # n8n JSON workflow'ları (import et → çalıştır)
 │   ├── 1-meta-kampanya-olustur.json
 │   ├── 2-google-ads-optimize.json
-│   └── 3-cross-platform-report.json
+│   ├── 3-cross-platform-report.json
+│   ├── 4-tiktok-rapor.json
+│   └── 5-linkedin-rapor.json
 ├── skills/             # Claude Code skill dosyaları
 │   ├── meta-ads-skill.md
-│   └── meta-ads-analyzer-skill.md
+│   ├── meta-ads-analyzer-skill.md
+│   ├── tiktok-ads-skill.md
+│   └── linkedin-ads-skill.md
 ├── mcp/                # MCP server config'leri
 │   ├── meta-ads-mcp.json
-│   └── google-ads-mcp.json
+│   ├── google-ads-mcp.json
+│   ├── adspirer-mcp.json       # TikTok+LinkedIn+Google+Meta (hosted)
+│   ├── tiktok-ads-mcp.json     # self-host alternatif
+│   └── linkedin-ads-mcp.json   # self-host alternatif
 ├── prompts/            # Claude system prompt'ları
 │   ├── meta-ads-prompt.md
-│   └── google-ads-prompt.md
+│   ├── google-ads-prompt.md
+│   ├── tiktok-ads-prompt.md
+│   └── linkedin-ads-prompt.md
 ├── docs/               # Detaylı dokümantasyon
-│   ├── KURULUM.md
-│   ├── MCP-KURULUM.md
-│   ├── N8N-KURULUM.md
+│   ├── KURULUM.md              # sıfırdan tam kurulum (8 adım)
+│   ├── MCP-KURULUM.md          # Claude Code'a MCP ekleme
+│   ├── N8N-KURULUM.md          # n8n otomasyonu
 │   ├── PLATFORM-API.md
 │   ├── TROUBLESHOOTING.md
 │   └── LEARNING-PHASE-GUIDE.md
@@ -149,11 +199,10 @@ ai-ads-manager-kit/
 └── LICENSE
 ```
 
-> **📍 Mevcut durum:** Hazır ve test edilebilir entegrasyonlar **Meta Ads** ve
-> **Google Ads / GA4**'tür (MCP config + skill + prompt + workflow). TikTok, LinkedIn,
-> YouTube ve Apple Ads **yol haritasındadır** — karşılaştırma tablolarında bu platformlar
-> için araç barındıran upstream projeler işaretlidir; kit'e entegrasyonları sırada.
-> Katkı için: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+> **📍 Mevcut durum:** **Meta Ads**, **Google Ads / GA4**, **TikTok Ads** ve **LinkedIn Ads**
+> hazır (MCP config + skill + prompt + workflow). YouTube ve Apple Ads **yol haritasında**.
+> Hangi platformda ne olduğunu [Desteklenen Platformlar](#-desteklenen-platformlar)
+> tablosundan gör. Yeni platform eklemek için: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ---
 
