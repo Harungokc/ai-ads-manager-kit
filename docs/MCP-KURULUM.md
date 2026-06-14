@@ -41,9 +41,11 @@ talimatları izle ve `.env`'deki `META_ACCESS_TOKEN`, `META_AD_ACCOUNT_ID` değe
 
 **Kaynak:** [irinabuht12-oss/google-meta-ads-ga4-mcp](https://github.com/irinabuht12-oss/google-meta-ads-ga4-mcp) · 250+ araç
 
-Hosted SSE endpoint olarak çalışır.
+Hosted SSE endpoint olarak çalışır. Endpoint URL'i **public değildir** — hosted servis
+**[Ryze AI](https://www.get-ryze.ai/)** üzerinden sağlanır.
 
-1. Kaynak repodaki kurulum rehberini (SETUP_CLAUDE.md) izleyerek kendi MCP endpoint URL'ini al.
+1. [Ryze AI](https://www.get-ryze.ai/)'dan (veya kaynak repodaki `docs/SETUP_CLAUDE.md` /
+   `docs/SETUP_N8N.md` rehberinden) kendi MCP endpoint URL'ini al.
 2. URL'i `.env`'e `GA_MCP_ENDPOINT_URL` olarak kaydet.
 3. Claude Code'a ekle:
    ```bash
