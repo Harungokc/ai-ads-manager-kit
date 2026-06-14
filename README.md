@@ -1,23 +1,39 @@
 # 🚀 AI Ads Manager Kit
 
-> Claude Code, n8n ve MCP ile Google Ads, Meta Ads, TikTok, LinkedIn, YouTube ve Apple Ads'i yönet — **600+ araç, tek komutla.**
+> Claude Code, n8n ve MCP ile Google Ads, Meta Ads ve daha fazlasını doğal dille yönet —
+> alandaki en iyi MCP server'larını **tek konfigürasyonla** bir araya getirir, **600+ araca erişim** sağlar.
 
 [![Stars](https://img.shields.io/github/stars/Harungokc/ai-ads-manager-kit?style=flat)](https://github.com/Harungokc/ai-ads-manager-kit)
 [![MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+## 🧩 Bu Repo Ne? (Nasıl Çalışır)
+
+Bu bir **orkestrasyon / birleştirme katmanı** — reklam araçlarını kendisi içermez.
+Bunun yerine alandaki en güçlü açık kaynak/hosted **MCP server'larını** Claude Code'a
+bağlar; 600+ araç bu upstream server'lardan gelir (hepsi [aşağıda](#-kaynak-repolar)
+kredilenmiştir). Repo'nun kattığı değer:
+
+- ✅ **Hazır MCP config'leri** — server'ları tek dosyayla bağla ([`mcp/`](mcp/), [`docs/MCP-KURULUM.md`](docs/MCP-KURULUM.md))
+- ✅ **Claude Code skill'leri & prompt'ları** — Meta/Google için hazır uzman davranışı ([`skills/`](skills/), [`prompts/`](prompts/))
+- ✅ **n8n workflow'ları** — kampanya oluşturma, optimizasyon, çok-platform rapor (import-edilebilir, [`workflows/`](workflows/))
+- ✅ **Türkçe, sıfırdan dokümantasyon** — kurulum, learning phase, troubleshooting ([`docs/`](docs/))
 
 ## ⚡ Hızlı Başlangıç
 
 ### 1. Kurulum (5 dakika)
 
 ```bash
-# Claude Code'u aç
-claude
+# Claude Code'da Meta Ads MCP'yi (pipeboard, hosted) ekle:
+claude mcp add --transport http meta-ads https://meta-ads.mcp.pipeboard.co/
 
-# MCP server'ı ekle
-claude /mcp add meta-ads-mcp -- npx -y @pipeboard-co/meta-ads-mcp
+# Bağlandı mı kontrol et:
+claude mcp list
 
-# n8n'de import et (bkz. workflows/)
+# Detaylı MCP kurulumu (Google/GA4 dahil) → docs/MCP-KURULUM.md
+# n8n workflow'larını import et → workflows/ (bkz. docs/N8N-KURULUM.md)
 ```
+> ⚠️ Bu MCP server'lar **hosted servislerdir** (npm `npx` paketi değil). Endpoint ve
+> token'lar için: [`docs/MCP-KURULUM.md`](docs/MCP-KURULUM.md).
 
 ### 2. Platform Bağlantıları
 
@@ -52,6 +68,10 @@ claude "Kampanya 'Summer Sale' learning phase'ta ne durumda?"
 
 ## 📊 Özellik Karşılaştırması — Best-of 11 Repo
 
+> Aşağıdaki tablolar, bu kitin **hangi upstream projeleri birleştirdiğini** ve her
+> birinin neyi iyi yaptığını gösterir. Tikler bu kitin değil, kaynak projelerin
+> özellikleridir; kit bunları tek noktadan erişilebilir kılar.
+
 | Özellik | NotFair | claude-ads | google-meta-ads-ga4-mcp | meta-ads-mcp | meta-ads-analyzer |
 |---------|---------|------------|-------------------------|---------------|-------------------|
 | **Yıldız** | 2849⭐ | 6021⭐ | 1009⭐ | 987⭐ | 364⭐ |
@@ -77,7 +97,11 @@ claude "Kampanya 'Summer Sale' learning phase'ta ne durumda?"
 
 ---
 
-## 🧰 Araç Sayısı (Platform Başına)
+## 🧰 Araç Sayısı (Upstream MCP'lerden Erişilen)
+
+> Bu sayılar bağlanan **upstream MCP server'larından** gelir — bu repo araç yazmaz,
+> erişimi birleştirir. Aşağıdaki ✅'ler hangi platform için hangi kaynakta araç
+> bulunduğunu gösterir.
 
 | Platform | claude-ads | google-meta-ads-ga4-mcp | markifact-mcp | ads-mcp | meta-ads-mcp |
 |----------|-----------|-------------------------|---------------|---------|--------------|
@@ -90,7 +114,7 @@ claude "Kampanya 'Summer Sale' learning phase'ta ne durumda?"
 | **GA4** | ✅ | ✅ | ✅ | ❌ | ❌ |
 | **Microsoft Ads** | ✅ | ❌ | ❌ | ❌ | ❌ |
 
-**Toplam: 600+ araç**
+**Toplam: 600+ araca erişim** (bağlanan upstream MCP server'ları üzerinden)
 
 ---
 
@@ -121,8 +145,15 @@ ai-ads-manager-kit/
 ├── .env.example
 ├── requirements.txt
 ├── CLAUDE.md           # AI ajanlar için kurulum rehberi
+├── CONTRIBUTING.md     # Katkı & geliştirme rehberi
 └── LICENSE
 ```
+
+> **📍 Mevcut durum:** Hazır ve test edilebilir entegrasyonlar **Meta Ads** ve
+> **Google Ads / GA4**'tür (MCP config + skill + prompt + workflow). TikTok, LinkedIn,
+> YouTube ve Apple Ads **yol haritasındadır** — karşılaştırma tablolarında bu platformlar
+> için araç barındıran upstream projeler işaretlidir; kit'e entegrasyonları sırada.
+> Katkı için: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ---
 

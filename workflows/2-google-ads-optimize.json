@@ -1,22 +1,71 @@
 {
-  "name": "Google Ads Optimizasyon",
+  "name": "2 - Google Ads Optimizasyon",
   "nodes": [
     {
-      "name": "Google Ads MCP",
-      "type": "mcp",
       "parameters": {
-        "server": "google-ads-mcp",
-        "tool": "get_campaign_performance",
-        "customer_id": "{{ $env.GOOGLE_ADS_CUSTOMER_ID }}"
-      }
+        "rule": { "interval": [{ "field": "days", "triggerAtHour": 9 }] }
+      },
+      "id": "schedule",
+      "name": "Her Gün 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 320]
     },
     {
-      "name": "Claude Analiz",
-      "type": "http_request",
       "parameters": {
-        "url": "https://api.minimaxi.chat/chat_completion",
-        "method": "POST"
-      }
+        "method": "POST",
+        "url": "=https://googleads.googleapis.com/v18/customers/{{ $env.GOOGLE_ADS_CUSTOMER_ID }}/googleAds:searchStream",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "developer-token", "value": "={{ $env.GOOGLE_ADS_DEVELOPER_TOKEN }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.GOOGLE_ADS_ACCESS_TOKEN }}" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: \"SELECT campaign.name, metrics.cost_micros, metrics.clicks, metrics.impressions, metrics.conversions, metrics.ctr, metrics.average_cpc FROM campaign WHERE segments.date DURING LAST_7_DAYS\" }) }}",
+        "options": {}
+      },
+      "id": "google-fetch",
+      "name": "Google Ads — Son 7 Gün Performans",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 320],
+      "notes": "Google Ads API v18 (GAQL). OAuth access_token gerekir; developer-token onaylı olmalı. Self-host kurulumu için docs/PLATFORM-API.md."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"claude-sonnet-4-6\",\n  max_tokens: 2000,\n  system: \"Sen bir Google Ads optimizasyon uzmanısın. Performans verisini analiz et: düşük performanslı kampanyaları, negatif keyword fırsatlarını, bid/bütçe önerilerini ve ROAS iyileştirmelerini maddeler hâlinde ver. Veride olmayan metrik uydurma.\",\n  messages: [{ role: \"user\", content: \"Son 7 gün Google Ads verisi:\\n\" + JSON.stringify($json) }]\n}) }}",
+        "options": {}
+      },
+      "id": "claude-analyze",
+      "name": "Claude — Optimizasyon Analizi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 320],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE", "name": "Anthropic API (x-api-key)" } }
     }
-  ]
+  ],
+  "connections": {
+    "Her Gün 09:00": { "main": [[{ "node": "Google Ads — Son 7 Gün Performans", "type": "main", "index": 0 }]] },
+    "Google Ads — Son 7 Gün Performans": { "main": [[{ "node": "Claude — Optimizasyon Analizi", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {},
+  "pinData": {}
 }

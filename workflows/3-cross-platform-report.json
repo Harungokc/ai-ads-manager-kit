@@ -1,36 +1,101 @@
 {
-  "name": "Cross-Platform Rapor",
+  "name": "3 - Cross-Platform Rapor",
   "nodes": [
     {
-      "name": "Meta Ads Veri",
-      "type": "mcp",
-      "parameters": {"tool": "get_insights", "server": "meta-ads-mcp"}
-    },
-    {
-      "name": "Google Ads Veri",
-      "type": "mcp",
-      "parameters": {"tool": "get_performance", "server": "google-ads-mcp"}
-    },
-    {
-      "name": "TikTok Ads Veri",
-      "type": "mcp",
-      "parameters": {"tool": "get_report"}
-    },
-    {
-      "name": "Rapor Oluştur",
-      "type": "http_request",
       "parameters": {
-        "url": "https://api.minimaxi.chat/chat_completion",
-        "method": "POST",
-        "body": {
-          "messages": [
-            {"role": "system", "content": "Sen bir reklam analistsin. Meta, Google ve TikTok verilerini karşılaştırmalı rapora dönüştür."},
-            {"role": "user", "content": "Meta: {{ $node['Meta Ads Veri'].json }}
-Google: {{ $node['Google Ads Veri'].json }}
-TikTok: {{ $node['TikTok Ads Veri'].json }}"}
+        "rule": { "interval": [{ "field": "weeks", "triggerAtDay": [1], "triggerAtHour": 9 }] }
+      },
+      "id": "schedule",
+      "name": "Her Pazartesi 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 360]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://graph.facebook.com/v25.0/{{ $env.META_AD_ACCOUNT_ID }}/insights",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "date_preset", "value": "last_7d" },
+            { "name": "fields", "value": "campaign_name,spend,impressions,clicks,ctr,cpc,actions" },
+            { "name": "access_token", "value": "={{ $env.META_ACCESS_TOKEN }}" }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "meta-data",
+      "name": "Meta — Son 7 Gün",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 240]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://googleads.googleapis.com/v18/customers/{{ $env.GOOGLE_ADS_CUSTOMER_ID }}/googleAds:searchStream",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "developer-token", "value": "={{ $env.GOOGLE_ADS_DEVELOPER_TOKEN }}" },
+            { "name": "Authorization", "value": "=Bearer {{ $env.GOOGLE_ADS_ACCESS_TOKEN }}" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: \"SELECT campaign.name, metrics.cost_micros, metrics.clicks, metrics.conversions FROM campaign WHERE segments.date DURING LAST_7_DAYS\" }) }}",
+        "options": {}
+      },
+      "id": "google-data",
+      "name": "Google — Son 7 Gün",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [480, 440]
+    },
+    {
+      "parameters": { "mode": "combine", "combineBy": "combineAll", "options": {} },
+      "id": "merge",
+      "name": "Verileri Birleştir",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [720, 360]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"claude-sonnet-4-6\",\n  max_tokens: 2500,\n  system: \"Sen bir reklam analistsin. Meta ve Google verilerini tek bir karşılaştırmalı haftalık rapora dönüştür: platform bazında harcama/dönüşüm/ROAS, en iyi ve en kötü kampanyalar, gelecek hafta önerileri. Markdown formatında, veriye sadık kalarak yaz.\",\n  messages: [{ role: \"user\", content: \"Bu haftanın çok-platformlu verisi:\\n\" + JSON.stringify($json) }]\n}) }}",
+        "options": {}
+      },
+      "id": "claude-report",
+      "name": "Claude — Karşılaştırmalı Rapor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [960, 360],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE", "name": "Anthropic API (x-api-key)" } },
+      "notes": "Çıktıyı buradan Gmail / Slack / Telegram node'una bağlayıp raporu otomatik gönderebilirsin."
     }
-  ]
+  ],
+  "connections": {
+    "Her Pazartesi 09:00": { "main": [[{ "node": "Meta — Son 7 Gün", "type": "main", "index": 0 }, { "node": "Google — Son 7 Gün", "type": "main", "index": 0 }]] },
+    "Meta — Son 7 Gün": { "main": [[{ "node": "Verileri Birleştir", "type": "main", "index": 0 }]] },
+    "Google — Son 7 Gün": { "main": [[{ "node": "Verileri Birleştir", "type": "main", "index": 1 }]] },
+    "Verileri Birleştir": { "main": [[{ "node": "Claude — Karşılaştırmalı Rapor", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {},
+  "pinData": {}
 }

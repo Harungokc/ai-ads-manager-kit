@@ -1,35 +1,89 @@
 {
-  "name": "Meta Kampanya Oluşturucu",
+  "name": "1 - Meta Kampanya Oluşturucu",
   "nodes": [
     {
-      "name": "Meta Ads MCP",
-      "type": "mcp",
-      "parameters": {
-        "server": "meta-ads-mcp",
-        "tool": "create_campaign",
-        "account_id": "{{ $env.META_AD_ACCOUNT_ID }}",
-        "name": "{{ $json.campaign_name }}",
-        "objective": "{{ $json.objective }}",
-        "status": "PAUSED",
-        "budget": "{{ $json.budget }}"
-      }
+      "parameters": {},
+      "id": "trigger",
+      "name": "Manuel Tetik",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 320],
+      "notes": "Form / Webhook ile değiştirilebilir. Girdi: campaign_name, objective, daily_budget."
     },
     {
-      "name": "Claude Yorumla",
-      "type": "http_request",
       "parameters": {
-        "url": "https://api.minimaxi.chat/chat_completion",
-        "method": "POST",
-        "body": {
-          "model": "MiniMax-M2.7",
-          "messages": [
-            {"role": "user", "content": "Yeni kampanya oluşturuldu: {{ $json.campaign_name }}. Önerilen optimizasyonları listele."}
+        "assignments": {
+          "assignments": [
+            { "id": "1", "name": "campaign_name", "value": "={{ $json.campaign_name || 'Yeni Kampanya' }}", "type": "string" },
+            { "id": "2", "name": "objective", "value": "={{ $json.objective || 'OUTCOME_TRAFFIC' }}", "type": "string" },
+            { "id": "3", "name": "daily_budget", "value": "={{ $json.daily_budget || '5000' }}", "type": "string" }
           ]
-        }
-      }
+        },
+        "options": {}
+      },
+      "id": "set-params",
+      "name": "Kampanya Parametreleri",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 320]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v25.0/{{ $env.META_AD_ACCOUNT_ID }}/campaigns",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "name", "value": "={{ $json.campaign_name }}" },
+            { "name": "objective", "value": "={{ $json.objective }}" },
+            { "name": "status", "value": "PAUSED" },
+            { "name": "special_ad_categories", "value": "[]" },
+            { "name": "daily_budget", "value": "={{ $json.daily_budget }}" },
+            { "name": "access_token", "value": "={{ $env.META_ACCESS_TOKEN }}" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "meta-create",
+      "name": "Meta — Kampanya Oluştur (PAUSED)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 320],
+      "notes": "Meta Marketing API v25.0. Kampanya GÜVENLİK için PAUSED açılır — sen Ads Manager'dan onaylayıp yayına alırsın."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "anthropic-version", "value": "2023-06-01" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  model: \"claude-haiku-4-5\",\n  max_tokens: 1200,\n  system: \"Sen bir Meta Ads uzmanısın. Yeni oluşturulan kampanya için yayına almadan önce kontrol listesi ve ilk optimizasyon önerileri ver (kitle, yerleşim, creative, bütçe). Kısa ve maddeli yaz.\",\n  messages: [{ role: \"user\", content: \"Kampanya oluşturuldu: \" + $('Kampanya Parametreleri').item.json.campaign_name + \" | objective: \" + $('Kampanya Parametreleri').item.json.objective + \" | günlük bütçe: \" + $('Kampanya Parametreleri').item.json.daily_budget + \". Meta API yanıtı: \" + JSON.stringify($json) }]\n}) }}",
+        "options": {}
+      },
+      "id": "claude-suggest",
+      "name": "Claude — Optimizasyon Önerisi",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 320],
+      "credentials": { "httpHeaderAuth": { "id": "REPLACE", "name": "Anthropic API (x-api-key)" } }
     }
   ],
   "connections": {
-    "Meta Ads MCP": {"output": ["Claude Yorumla"]}
-  }
+    "Manuel Tetik": { "main": [[{ "node": "Kampanya Parametreleri", "type": "main", "index": 0 }]] },
+    "Kampanya Parametreleri": { "main": [[{ "node": "Meta — Kampanya Oluştur (PAUSED)", "type": "main", "index": 0 }]] },
+    "Meta — Kampanya Oluştur (PAUSED)": { "main": [[{ "node": "Claude — Optimizasyon Önerisi", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "meta": {},
+  "pinData": {}
 }
