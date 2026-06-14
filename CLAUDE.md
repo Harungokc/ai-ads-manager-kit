@@ -17,7 +17,8 @@ cp .env.example .env
 # .env dosyasını kendi API anahtarlarınla doldur
 
 # 4. Claude Code MCP ayarları
-# ~/.claude/settings/mcp.json dosyasına ekle:
+# `claude mcp add` komutuyla ekle (aşağıdaki örnekler) veya proje kökünde .mcp.json kullan.
+# Ayrıntı: docs/MCP-KURULUM.md
 ```
 
 ## MCP Server Config'leri

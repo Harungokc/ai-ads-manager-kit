@@ -1,0 +1,27 @@
+# Ortam değişkenleri — ASLA commit etme
+.env
+.env.local
+.env.*.local
+
+# Kimlik / anahtar dosyaları
+keys/
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# n8n / yerel veri
+.n8n/
+
+# OS / editör
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
