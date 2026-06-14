@@ -1,0 +1,22 @@
+{
+  "name": "Google Ads Optimizasyon",
+  "nodes": [
+    {
+      "name": "Google Ads MCP",
+      "type": "mcp",
+      "parameters": {
+        "server": "google-ads-mcp",
+        "tool": "get_campaign_performance",
+        "customer_id": "{{ $env.GOOGLE_ADS_CUSTOMER_ID }}"
+      }
+    },
+    {
+      "name": "Claude Analiz",
+      "type": "http_request",
+      "parameters": {
+        "url": "https://api.minimaxi.chat/chat_completion",
+        "method": "POST"
+      }
+    }
+  ]
+}

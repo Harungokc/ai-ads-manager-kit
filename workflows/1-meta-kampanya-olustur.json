@@ -1,0 +1,35 @@
+{
+  "name": "Meta Kampanya Oluşturucu",
+  "nodes": [
+    {
+      "name": "Meta Ads MCP",
+      "type": "mcp",
+      "parameters": {
+        "server": "meta-ads-mcp",
+        "tool": "create_campaign",
+        "account_id": "{{ $env.META_AD_ACCOUNT_ID }}",
+        "name": "{{ $json.campaign_name }}",
+        "objective": "{{ $json.objective }}",
+        "status": "PAUSED",
+        "budget": "{{ $json.budget }}"
+      }
+    },
+    {
+      "name": "Claude Yorumla",
+      "type": "http_request",
+      "parameters": {
+        "url": "https://api.minimaxi.chat/chat_completion",
+        "method": "POST",
+        "body": {
+          "model": "MiniMax-M2.7",
+          "messages": [
+            {"role": "user", "content": "Yeni kampanya oluşturuldu: {{ $json.campaign_name }}. Önerilen optimizasyonları listele."}
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Meta Ads MCP": {"output": ["Claude Yorumla"]}
+  }
+}

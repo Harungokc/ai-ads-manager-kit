@@ -1,0 +1,36 @@
+{
+  "name": "Cross-Platform Rapor",
+  "nodes": [
+    {
+      "name": "Meta Ads Veri",
+      "type": "mcp",
+      "parameters": {"tool": "get_insights", "server": "meta-ads-mcp"}
+    },
+    {
+      "name": "Google Ads Veri",
+      "type": "mcp",
+      "parameters": {"tool": "get_performance", "server": "google-ads-mcp"}
+    },
+    {
+      "name": "TikTok Ads Veri",
+      "type": "mcp",
+      "parameters": {"tool": "get_report"}
+    },
+    {
+      "name": "Rapor Oluştur",
+      "type": "http_request",
+      "parameters": {
+        "url": "https://api.minimaxi.chat/chat_completion",
+        "method": "POST",
+        "body": {
+          "messages": [
+            {"role": "system", "content": "Sen bir reklam analistsin. Meta, Google ve TikTok verilerini karşılaştırmalı rapora dönüştür."},
+            {"role": "user", "content": "Meta: {{ $node['Meta Ads Veri'].json }}
+Google: {{ $node['Google Ads Veri'].json }}
+TikTok: {{ $node['TikTok Ads Veri'].json }}"}
+          ]
+        }
+      }
+    }
+  ]
+}
