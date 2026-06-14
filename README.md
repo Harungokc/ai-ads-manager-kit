@@ -19,7 +19,7 @@ kredilenmiştir). Repo'nun kattığı değer:
 - ✅ **Türkçe, sıfırdan dokümantasyon** — kurulum, learning phase, troubleshooting ([`docs/`](docs/))
 
 > 💡 **İpucu:** Tek bir hosted MCP ile (adspirer) **TikTok + LinkedIn + Google + Meta**'yı
-> birden bağlayabilirsin — OAuth ile, token uğraşı olmadan. Bkz. [Yol Haritası](#️-nereden-başlamalıyım-yol-haritası).
+> birden bağlayabilirsin — OAuth ile, token uğraşı olmadan. Bkz. [Yol Haritası](#-nereden-başlamalıyım-yol-haritası).
 
 ---
 

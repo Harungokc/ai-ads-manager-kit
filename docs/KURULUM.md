@@ -401,7 +401,7 @@ claude mcp list   # bağlı mı kontrol et
 - Meta: Uygulamaya `ads_read`, `ads_management` permission'ları ekle
 - Google: Service account'a GA4 Viewer rolü ver
 
-**Tüm sorunlar için:** [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) dosyasına bak.
+**Tüm sorunlar için:** [TROUBLESHOOTING.md](TROUBLESHOOTING.md) dosyasına bak.
 
 ---
 
